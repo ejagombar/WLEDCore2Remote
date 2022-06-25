@@ -16,9 +16,9 @@ void setup() {
 
 void loop() {
 
-  WifiSetupScreen.run();
-  
-  String t = GDTK.run("test:",0xefe1);
+
+  auto [SSID , colour] = WifiSetupScreen.run();
+  String t  = GDTK.run(SSID+" Pass: ",colour,false);
   Serial.println(t);
   delay(1000);
   
