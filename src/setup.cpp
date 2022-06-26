@@ -33,21 +33,20 @@ std::tuple<String, uint16_t> WifiSetup::run()
   delay(200);
   WifiSelectionScreen();
 
-  bool gotSSID = false;
-  String SSID = "";
+  //bool gotSSID = false;
+  //String WifiSSID = "";
   Serial.println("!!!!!!!about to start loop");
   while(gotSSID == false)
   {
     M5.update();
 
-      
-    Serial.println(": "+SSID);
+    Serial.println("The  var: "+WifiSSID);
     
   }
   Serial.println("Exitings Wifisetup");
   deinitButtons();
   Serial.println("Exitings Wifisetup");
-  return {SSID,returnedColour};
+  return {WifiSSID,returnedColour};
 }
 
 
@@ -164,16 +163,19 @@ void WifiSetup::deinitButtons()
 
 void WifiSetupButtonEvent(Event& e)
 {
+  WifiSetupScreen.testVar = "Yeeeeee";
   if(e.button == &M5.BtnA)  //Refresh
   {
     WifiSetupScreen.deinitButtons();
+    WifiSetupScreen.gotSSID = false;
+    WifiSetupScreen.WifiSSID = "";
     WifiSetupScreen.run();
     return;
   }
 
   else if(e.button == &M5.BtnC)  // Next
   {
-    if (WifiSetupScreen.SSID != "")
+    if (WifiSetupScreen.WifiSSID != "")
     {
       WifiSetupScreen.gotSSID = true;
     }
@@ -187,9 +189,9 @@ void WifiSetupButtonEvent(Event& e)
       if (WifiSetupScreen.buttonList[i]->isPressed() == true)
       {
         WifiSetupScreen.buttonList[i]->off = WifiSetupScreen.buttonList[i]->on;
-        WifiSetupScreen.SSID = WifiSetupScreen.buttonList[i]->SSIDString;
+        WifiSetupScreen.WifiSSID = WifiSetupScreen.buttonList[i]->SSIDString;
         WifiSetupScreen.returnedColour = WifiSetupScreen.buttonList[i]->SavedColours.text;
-        Serial.println("Got SSID");
+        Serial.println("Got SSID: "+WifiSetupScreen.WifiSSID);
       }
       else
       {

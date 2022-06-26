@@ -50,7 +50,8 @@ class WifiSetup
 
         const GFXfont font = FreeMonoBold9pt7b;
         bool gotSSID = false;
-        String SSID = "";
+        String WifiSSID = "";
+        String testVar = "";
         int numOfNetworks = 0;
         uint16_t returnedColour = 0;
         ButtonColors defaultColours = {BLACK, DARKGREY, BLACK};
