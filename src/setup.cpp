@@ -1,8 +1,20 @@
 #include "setup.h"
 
+void WifiSetupButtonEvent(Event& e);
 
-void buttonEvent(Event& e);
+struct RGB16BitColours
+{
+    uint16_t defaultColour;
+    uint16_t lighterColour;
+    uint16_t darkerColour;
+};
 
+
+uint16_t RGB16BIT(uint8_t r, uint8_t g, uint8_t b) {
+  return ((uint16_t)((r>>3)<<11)|((g>>2)<<5)|(b>>3));
+}
+
+//---------------------------------------------------------------------------------------
 
 WifiSetup::WifiSetup()
 {
@@ -14,13 +26,6 @@ WifiSetup::~WifiSetup()
 
 }
 
-struct RGB16BitColours
-{
-    uint16_t defaultColour;
-    uint16_t lighterColour;
-    uint16_t darkerColour;
-};
-
 std::tuple<String, uint16_t> WifiSetup::run()
 {
   WiFi.mode(WIFI_STA);
@@ -28,17 +33,24 @@ std::tuple<String, uint16_t> WifiSetup::run()
   delay(200);
   WifiSelectionScreen();
 
+  bool gotSSID = false;
+  String SSID = "";
+  Serial.println("!!!!!!!about to start loop");
   while(gotSSID == false)
   {
     M5.update();
+
+      
+    Serial.println(": "+SSID);
+    
   }
+  Serial.println("Exitings Wifisetup");
   deinitButtons();
+  Serial.println("Exitings Wifisetup");
   return {SSID,returnedColour};
 }
 
-uint16_t WifiSetup::RGB16BIT(uint8_t r, uint8_t g, uint8_t b) {
-  return ((uint16_t)((r>>3)<<11)|((g>>2)<<5)|(b>>3));
-}
+
 
 RGB16BitColours WifiSetup::WifiStrengthTo16BitColour(int strength)
 {
@@ -100,8 +112,6 @@ void WifiSetup::WifiSelectionScreen()
 
     initButtons();
 
-
-
     M5.Buttons.draw();
 
     M5.Lcd.setTextSize(1);
@@ -113,10 +123,6 @@ void WifiSetup::WifiSelectionScreen()
     M5.Lcd.drawString("Refresh", 55, 226,2);
     // Button C
     M5.Lcd.drawString("Next", 265, 226,2);
-
-    
-
-
   }
 
 }
@@ -140,17 +146,15 @@ void WifiSetup::initButtons()
 
     buttonList[i]->SSIDString = SSIDLabel;
     buttonList[i]->SavedColours = deselcted_clrs;
-
   }
 
-  M5.Buttons.addHandler(buttonEvent, E_TOUCH);
-
+  M5.Buttons.addHandler(WifiSetupButtonEvent, E_TOUCH);
 }
 
 void WifiSetup::deinitButtons()
 {
-  M5.Buttons.delHandlers(buttonEvent, nullptr, nullptr);
-
+  M5.Buttons.delHandlers(WifiSetupButtonEvent, nullptr, nullptr);
+  Serial.println("Deinit buttons");
   for(int i = 0; i < MAXSSID; i++)
   {
     delete(buttonList[i]);
@@ -158,7 +162,7 @@ void WifiSetup::deinitButtons()
   }
 }
 
-void buttonEvent(Event& e)
+void WifiSetupButtonEvent(Event& e)
 {
   if(e.button == &M5.BtnA)  //Refresh
   {
@@ -171,7 +175,6 @@ void buttonEvent(Event& e)
   {
     if (WifiSetupScreen.SSID != "")
     {
-      
       WifiSetupScreen.gotSSID = true;
     }
     return;
@@ -186,6 +189,7 @@ void buttonEvent(Event& e)
         WifiSetupScreen.buttonList[i]->off = WifiSetupScreen.buttonList[i]->on;
         WifiSetupScreen.SSID = WifiSetupScreen.buttonList[i]->SSIDString;
         WifiSetupScreen.returnedColour = WifiSetupScreen.buttonList[i]->SavedColours.text;
+        Serial.println("Got SSID");
       }
       else
       {
@@ -196,19 +200,112 @@ void buttonEvent(Event& e)
   }
 }
 
+//---------------------------------------------------------------------------------------------------
+
+
+WifiConnect::WifiConnect()
+{
+
+}
+
+WifiConnect::~WifiConnect()
+{
+
+}
+
+bool WifiConnect::run(String getSSID, String getPassword)
+{
+  SSID = getSSID;
+  password = getPassword;
+  isPressed = false;
+
+  return checkConnection();
+}
+
+void WifiConnect::waitForTap()
+{
+  M5.Lcd.println("Tap anywhere to continue");
+
+  M5.Buttons.addHandler(WifiConnectButtonEvent, E_TOUCH);
+  while (!isPressed)
+  {
+     M5.update();
+  }
+  M5.Buttons.delHandlers(WifiConnectButtonEvent, nullptr, nullptr);
+}
+
+
+bool WifiConnect::checkConnection()
+{
+
+  M5.Lcd.clear();
+  M5.Lcd.setFreeFont(&font);
+  M5.Lcd.setTextColor(WHITE);  
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setCursor(0, 20);
+  M5.Lcd.print("Connecting to " + SSID);
+
+  WiFi.begin(SSID.c_str(), password.c_str());
+  int timeOut = 0;
+  while ((WiFi.status() != WL_CONNECTED) && (timeOut < 20))
+  {
+    delay(500);
+    M5.Lcd.print(".");
+    timeOut++;
+    if (timeOut >= 20)
+    {
+      M5.Lcd.fillScreen(RED);  
+      M5.Lcd.setCursor(0, 20);
+      M5.Lcd.print("Connecting to " + SSID);
+      M5.Lcd.setTextSize(1);
+      M5.Lcd.println("\n\nConnection failed");
+      waitForTap();
+      return false;
+    }
+  }
+
+  M5.Lcd.fillScreen(RGB16BIT(0, 189, 31));
+  M5.Lcd.setCursor(0, 20);
+  M5.Lcd.print("Connecting to " + SSID);
+  M5.Lcd.setTextSize(1);
+  M5.Lcd.println("\n\nConnected!");
+  M5.Lcd.println("IP address: " + WiFi.localIP().toString());
+
+  M5.Lcd.println("Pinging google...");
+  bool success = Ping.ping("www.google.com");
+ 
+  if(!success){
+    M5.Lcd.println("Ping failed");
+    return false;
+  }
+ 
+  M5.Lcd.println("Ping succesful");
+
+  storeWifiData();
+
+  M5.Lcd.println("Saved Wifi Data to flash");
+
+  delay(200);
+  waitForTap();
+
+  return true;
+
+}
+
+void WifiConnectButtonEvent(Event& e)
+{
+ WifiConnectScreen.isPressed = true;
+}
+
+void WifiConnect::storeWifiData()
+{
+  preferences.begin("wifiData", false);
+  preferences.putString("SSID", SSID); 
+  preferences.putString("password", password);
+  preferences.end();
+
+}
 
 WifiSetup WifiSetupScreen;
-
-
-    // Button** SSIDList = new Button*[numOfNetworks];
-    // for (int i = 0; i < numOfNetworks; ++i)
-    // {
-    //   uint16_t StrengthColour = WifiStrengthTo16BitColour(WiFi.RSSI(i));
-    //   on_clrs  = {BLACK, WHITE, BLACK};
-    //   off_clrs = {BLACK, StrengthColour, BLACK}; 
-
-    //   String SSID =  WiFi.SSID(i).substring(0,12);
-
-    //   //SSIDList[i] = new Button(0, (30+36*i), 320, 35, false , "test", off_clrs, on_clrs, CC_DATUM);
-    //   SSIDList[i] = new Button(0, (31+36*(uint16_t)i), 320, 35, false , SSID.c_str(), off_clrs, on_clrs, CC_DATUM);
-    // }
+WifiConnect WifiConnectScreen;
+Preferences preferences;

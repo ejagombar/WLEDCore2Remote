@@ -5,14 +5,17 @@
 #include "WiFi.h"
 #include <Free_Fonts.h>
 #include <tuple>
-
+#include <ESP32Ping.h>
+#include <Preferences.h>
 
 struct RGB16BitColours;
 
-
-void buttonEvent(Event& e);
+void WifiSetupButtonEvent(Event& e);
+void WifiConnectButtonEvent(Event& e);
+uint16_t RGB16BIT(uint8_t r, uint8_t g, uint8_t b);
 
 class WifiSetup;
+class WifiConnect;
 
 class SSIDButton: public Button
 {
@@ -32,14 +35,14 @@ class WifiSetup
 
         std::tuple<String, uint16_t> run();
 
-        friend void buttonEvent(Event& e);
+        friend void WifiSetupButtonEvent(Event& e);
 
     private:
 
         #define MAXSSID (5)
 
         RGB16BitColours WifiStrengthTo16BitColour(int strength);
-        uint16_t RGB16BIT(uint8_t r, uint8_t g, uint8_t b);
+
         void WifiSelectionScreen();
         void PrintTitle();
         void initButtons();
@@ -55,7 +58,32 @@ class WifiSetup
 };
 
 
+class WifiConnect
+{
+    public:
+        WifiConnect();
+        ~WifiConnect();
+
+        bool run(String getSSID, String getPassword);
+
+        friend void WifiConnectButtonEvent(Event& e);
+
+    private:
+
+        bool checkConnection();
+        void waitForTap();
+        void storeWifiData();
+        String SSID;
+        String password;
+        bool isPressed = false;
+        const GFXfont font = FreeMonoBold9pt7b;
+};
+
+
+
 extern WifiSetup WifiSetupScreen;
+extern WifiConnect WifiConnectScreen;
+extern Preferences preferences;
 
 #endif //SETUPWIFI_H
 
