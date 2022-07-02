@@ -1,5 +1,5 @@
-#ifndef SETUP_H
-#define SETUP_H
+#ifndef WIFISETUP_H
+#define WIFISETUP_H
 
 #include <M5Core2.h>
 #include "WiFi.h"
@@ -7,6 +7,8 @@
 #include <tuple>
 #include <ESP32Ping.h>
 #include <Preferences.h>
+
+
 
 struct RGB16BitColours;
 
@@ -47,6 +49,7 @@ class WifiSetup
         void PrintTitle();
         void initButtons();
         void deinitButtons();
+
 
         const GFXfont font = FreeMonoBold9pt7b;
         bool gotSSID = false;

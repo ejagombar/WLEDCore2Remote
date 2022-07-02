@@ -1,4 +1,4 @@
-#include "setup.h"
+#include "WIFIsetup.h"
 
 void WifiSetupButtonEvent(Event& e);
 
@@ -14,7 +14,8 @@ uint16_t RGB16BIT(uint8_t r, uint8_t g, uint8_t b) {
   return ((uint16_t)((r>>3)<<11)|((g>>2)<<5)|(b>>3));
 }
 
-//---------------------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 WifiSetup::WifiSetup()
 {
@@ -33,20 +34,13 @@ std::tuple<String, uint16_t> WifiSetup::run()
   delay(200);
   WifiSelectionScreen();
 
-  //bool gotSSID = false;
-  //String WifiSSID = "";
-  Serial.println("!!!!!!!about to start loop");
   while(gotSSID == false)
   {
-    M5.update();
-
-    Serial.println("The  var: "+WifiSSID);
-    
+    M5.update();   
   }
-  Serial.println("Exitings Wifisetup");
   deinitButtons();
-  Serial.println("Exitings Wifisetup");
-  return {WifiSSID,returnedColour};
+
+  return std::make_tuple(WifiSSID,returnedColour);
 }
 
 
@@ -87,7 +81,7 @@ void WifiSetup::PrintTitle()
   M5.Lcd.setTextColor(WHITE);  
   M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(55, 20);
-  M5.Lcd.println("Wifi Setup ");
+  M5.Lcd.println("Wifi Setup");
 }
 
 void WifiSetup::WifiSelectionScreen()
@@ -202,7 +196,8 @@ void WifiSetupButtonEvent(Event& e)
   }
 }
 
-//---------------------------------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 WifiConnect::WifiConnect()
@@ -249,12 +244,12 @@ bool WifiConnect::checkConnection()
 
   WiFi.begin(SSID.c_str(), password.c_str());
   int timeOut = 0;
-  while ((WiFi.status() != WL_CONNECTED) && (timeOut < 20))
+  while ((WiFi.status() != WL_CONNECTED) && (timeOut < 25))
   {
     delay(500);
     M5.Lcd.print(".");
     timeOut++;
-    if (timeOut >= 20)
+    if (timeOut >= 25)
     {
       M5.Lcd.fillScreen(RED);  
       M5.Lcd.setCursor(0, 20);
@@ -302,11 +297,14 @@ void WifiConnectButtonEvent(Event& e)
 void WifiConnect::storeWifiData()
 {
   preferences.begin("wifiData", false);
-  preferences.putString("SSID", SSID); 
+  preferences.putString("ssid", SSID); 
   preferences.putString("password", password);
   preferences.end();
 
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 WifiSetup WifiSetupScreen;
 WifiConnect WifiConnectScreen;
