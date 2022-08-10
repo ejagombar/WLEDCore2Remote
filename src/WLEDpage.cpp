@@ -14,8 +14,10 @@ WLEDpage::WLEDpage()
 
 WLEDpage::~WLEDpage()
 {
-
+ 
 }
+
+
 
 void WLEDpage::importWLEDData(WLED getWLEDLights[])
 {
