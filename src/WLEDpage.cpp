@@ -2,6 +2,49 @@
 #include "WIFIsetup.h"
 
 
+WLED::WLED()
+{
+
+}
+
+WLED::~WLED()
+{
+
+}
+
+void WLED::loadData(uint16_t getNum, String getIP, String getName, uint16_t getColour)
+{
+    name = getName;
+    IP = getIP;
+    hasData = true;
+    num = getNum;
+    colour = getColour;
+}
+
+
+String WLED::getIP()
+{
+    return IP;
+}
+
+String WLED::getName()
+{
+    return name;
+}
+
+bool WLED::getHasData()
+{
+    return hasData;
+}
+
+uint16_t WLED::getColour()
+{
+    return colour;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 WLEDpage::WLEDpage()
@@ -9,7 +52,7 @@ WLEDpage::WLEDpage()
     gotIP = false;
     WLEDIP = "";
     WLEDname = "";
-    //run();
+    //openScreen();
 }
 
 WLEDpage::~WLEDpage()
@@ -26,11 +69,39 @@ void WLEDpage::importWLEDData(WLED getWLEDLights[])
 }
 
 
-void WLEDpage::run()
+void WLEDpage::openScreen()
 {
-
-
+    
+    initButtons();
     drawScreen();
+}
+
+void WLEDpage::closeScreen()
+{
+    deinitButtons();
+}
+
+void WLEDpage::initButtons()
+{
+    ButtonColors off_clrs = {BLACK, BLACK, BLACK};
+    for (int i = 0; i < maxNumofWLED; i++)
+    {
+        String buttonName = String(i);
+        buttonList[i] = new Button(0, 69*(i+1)-4-65/2, 320, 65, false , buttonName.c_str(), off_clrs, off_clrs, CC_DATUM);
+    }
+
+    M5.Buttons.addHandler(WLEDPageButtonEvent, E_TOUCH);
+}
+
+void WLEDpage::deinitButtons()
+{
+    M5.Buttons.delHandlers(WLEDPageButtonEvent, nullptr, nullptr);
+
+    for(int i = 0; i < maxNumofWLED; i++)
+    {
+        delete(buttonList[i]);
+        buttonList[i] = NULL;
+    }
 }
 
 void WLEDpage::drawScreen()
@@ -42,6 +113,8 @@ void WLEDpage::drawScreen()
     M5.Lcd.setCursor(55, 20);
     M5.Lcd.println("WLED Setup");
 
+    
+
     uint16_t deepGray = RGB16BIT(40,40,40);
     uint16_t deepGray2 = RGB16BIT(68,68,68);
 
@@ -49,18 +122,12 @@ void WLEDpage::drawScreen()
     {
         if (WLEDLights[i].getHasData() == true)
         {
-            drawRoundBox(i*100, 100, 100, 100, deepGray);
-            M5.Lcd.setTextColor(WHITE);  
-            M5.Lcd.setTextSize(1);
-            M5.Lcd.setCursor(i*100+10, 110);
-            M5.Lcd.println(WLEDLights[i].getName());
-            M5.Lcd.setCursor(i*100+10, 130);
-            M5.Lcd.println(WLEDLights[i].getIP());
+            drawFullCell(i, deepGray, deepGray2);
         }
         else
         {
-            //drawEmptyCell(i, deepGray, deepGray2);
-            drawFullCell(i, deepGray, deepGray2);
+            drawEmptyCell(i, deepGray, deepGray2);
+            //drawFullCell(i, deepGray, deepGray2);
         }
     }
 }
@@ -70,17 +137,13 @@ void WLEDpage::drawFullCell(uint16_t position, uint16_t colour1, uint16_t colour
 {
     drawRoundBox(M5.Lcd.width()/2,69*(position+1)-4,M5.Lcd.width()-6, 65, colour1);
     M5.Lcd.setTextSize(1);
-    M5.Lcd.drawString("192.168.1.174",16,69*(position+1)+5,1);
+    M5.Lcd.drawString(WLEDLights[position].getIP(),16,69*(position+1)+5,1);
     M5.Lcd.setTextSize(2);
-    M5.Lcd.drawString("Bed Lights",13,69*(position+1)-32,1);
+    M5.Lcd.drawString(WLEDLights[position].getName(),13,69*(position+1)-32,1);
 
     M5.Lcd.fillCircle(M5.Lcd.width() - 35 , 69*(position+1)-4, 24, BLACK);
 }
 
-void WLEDpage::drawOnOffButton(uint16_t position, uint16_t colour1, uint16_t colour2,bool isOn)
-{
-    
-}
 
 void WLEDpage::drawEmptyCell(uint16_t position, uint16_t colour1, uint16_t colour2)
  {
@@ -115,41 +178,26 @@ void WLEDpage::drawPlusButton(uint16_t x, uint16_t y,uint16_t size, uint16_t cir
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-WLED::WLED()
+
+
+void WLEDPageButtonEvent(Event& e)
 {
+    Button& b = *e.button;
+    int i = 1;
+    Serial.println(b.label());
+    uint16_t deepGray = RGB16BIT(140,140,140);
+    uint16_t deepGray2 = RGB16BIT(168,168,168);
 
+    if (WLEDtabPage.WLEDLights[i].getHasData() == true)
+    {
+        WLEDtabPage.drawFullCell(i, deepGray, deepGray2);
+    }
+    else
+    {
+        WLEDtabPage.drawEmptyCell(i, deepGray, deepGray2);
+        //drawFullCell(i, deepGray, deepGray2);
+    }
 }
-
-WLED::~WLED()
-{
-
-}
-
-void WLED::loadData(uint16_t getNum, String getIP, String getName)
-{
-    name = getName;
-    IP = getIP;
-    hasData = true;
-    num = getNum;
-}
-
-
-String WLED::getIP()
-{
-    return IP;
-}
-
-String WLED::getName()
-{
-    return name;
-}
-
-bool WLED::getHasData()
-{
-    return hasData;
-}
-
-
 
 
 

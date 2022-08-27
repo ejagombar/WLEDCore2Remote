@@ -157,7 +157,6 @@ void WifiSetup::deinitButtons()
 
 void WifiSetupButtonEvent(Event& e)
 {
-  WifiSetupScreen.testVar = "Yeeeeee";
   if(e.button == &M5.BtnA)  //Refresh
   {
     WifiSetupScreen.deinitButtons();

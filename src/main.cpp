@@ -22,6 +22,8 @@ void setup() {
   M5.begin(); 
   checkForWifiData();
   checkForSavedWLED();
+  WLEDtabPage.importWLEDData(WLEDLights);
+  WLEDtabPage.openScreen();
 }
 
 
@@ -62,7 +64,7 @@ void checkForWifiData() //-----------------------------------checkForWifiData---
   }
 
   M5.Buttons.addHandler(getTabSelection, E_TOUCH);
-  WLEDtabPage.run();
+  
 }
 
 void setupProcess() //-------------------------------------setupProcess---------------------------------------
@@ -81,19 +83,32 @@ void setupProcess() //-------------------------------------setupProcess---------
 
 void checkForSavedWLED() //-------------------------------------checkForSavedWLED---------------------------------------
 {
+    preferences.begin("wled1", false);
+    preferences.putString("ip", "192.168.1.172"); 
+    preferences.putString("name", "Eds Room");
+    preferences.putUShort("colour", RED);
+    preferences.end();
+    preferences.begin("wled0", false);
+    preferences.putString("ip", "192.168.1.165"); 
+    preferences.putString("name", "Bed");
+    preferences.putUShort("colour", RED);
+    preferences.end();
   for (int i = 0; i < maxNumofWLED; i++)
   {
     String wledSavedName = "wled";
     wledSavedName += i;
     char charBuf[50];
     wledSavedName.toCharArray(charBuf, 50);
+    Serial.print(wledSavedName);
     preferences.begin(charBuf, false);
 
     String ip = preferences.getString("ip", ""); 
     String name = preferences.getString("name", "");
+    uint16_t colour = preferences.getUShort("colour", 0);
     if (!(ip == "" || name == ""))
     {
-      WLEDLights[i].loadData(i, ip, name);
+      WLEDLights[i].loadData(i, ip, name,colour);
+      Serial.print(WLEDLights[i].getName());
     }
 
     preferences.end();
@@ -109,9 +124,10 @@ void loop() //-------------------------------------loop-------------------------
 
 void getTabSelection(Event& e)
 {
+  WLEDtabPage.closeScreen();
   if (e.button == &M5.BtnA)
   {
-    WLEDtabPage.run();
+    WLEDtabPage.openScreen();
   }
   else if (e.button == &M5.BtnB)
   {

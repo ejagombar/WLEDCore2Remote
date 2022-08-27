@@ -7,6 +7,9 @@
 #include <Free_Fonts.h>
 #include <Preferences.h>
 
+void WLEDPageButtonEvent(Event& e);
+
+
 class WLEDpage;
 class WLED;
 
@@ -18,9 +21,10 @@ class WLED
         WLED();
         ~WLED();
 
-        void loadData(uint16_t num, String IP, String name );
+        void loadData(uint16_t num, String IP, String name, uint16_t getColour);
         String getIP();
         String getName();
+        uint16_t getColour();
         bool getHasData();
 
     private:
@@ -28,6 +32,7 @@ class WLED
        
         String IP = "";
         String name = "";
+        uint16_t colour = 0;
         bool hasData = false;
         uint16_t num;
 
@@ -42,9 +47,11 @@ class WLEDpage
         WLEDpage();
         ~WLEDpage();
 
-        void run();
+        void openScreen();
+        void closeScreen();
         void importWLEDData(WLED WLEDLights[]);
-
+        
+        friend void WLEDPageButtonEvent(Event& e);
 
     private:
 
@@ -55,13 +62,15 @@ class WLEDpage
         void drawEmptyCell(uint16_t position, uint16_t colour1, uint16_t colour2);
         void drawScreen();
         void drawFullCell(uint16_t position, uint16_t colour1, uint16_t colour2);
-        void drawOnOffButton(uint16_t position, uint16_t colour1, uint16_t colour2,bool isOn);
+        void initButtons();
+        void deinitButtons();
 
         bool gotIP = false;
         String WLEDIP;
         String WLEDname;
         const GFXfont font = FreeMonoBold9pt7b;
-        WLED WLEDLights[3];
+        WLED WLEDLights[maxNumofWLED];
+        Button *buttonList[maxNumofWLED];
 };
 
 extern WLEDpage WLEDtabPage;
