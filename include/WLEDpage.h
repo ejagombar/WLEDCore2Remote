@@ -26,6 +26,9 @@ class WLED
         String getName();
         uint16_t getColour();
         bool getHasData();
+        
+
+        bool on = false;
 
     private:
 
@@ -33,6 +36,7 @@ class WLED
         String IP = "";
         String name = "";
         uint16_t colour = 0;
+        
         bool hasData = false;
         uint16_t num;
 

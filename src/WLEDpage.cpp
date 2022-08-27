@@ -2,6 +2,10 @@
 #include "WIFIsetup.h"
 
 
+uint16_t deepGray = RGB16BIT(40,40,40);
+uint16_t gray = RGB16BIT(68,68,68);
+
+
 WLED::WLED()
 {
 
@@ -73,9 +77,9 @@ void WLEDpage::importWLEDData(WLED getWLEDLights[])
 
 void WLEDpage::openScreen()
 {
-    
     initButtons();
     drawScreen();
+    
 }
 
 void WLEDpage::closeScreen()
@@ -85,14 +89,12 @@ void WLEDpage::closeScreen()
 
 void WLEDpage::initButtons()
 {
-    ButtonColors off_clrs = {BLACK, BLACK, BLACK};
     for (int i = 0; i < maxNumofWLED; i++)
     {
-        String buttonName = String(i);
-        buttonList[i] = new Button(0, 69*(i+1)-4-65/2, 320, 65, false , buttonName.c_str(), off_clrs, off_clrs, CC_DATUM);
+        String buttonName = String(i); 
+        buttonList[i] = new Button(0, 69*(i+1)-4-65/2, 320, 65, false,buttonName.c_str());
+        buttonList[i]->addHandler(WLEDPageButtonEvent, E_TOUCH);
     }
-
-    M5.Buttons.addHandler(WLEDPageButtonEvent, E_TOUCH);
 }
 
 void WLEDpage::deinitButtons()
@@ -115,37 +117,27 @@ void WLEDpage::drawScreen()
     M5.Lcd.setCursor(55, 20);
     M5.Lcd.println("WLED Setup");
 
-    
-
-    uint16_t deepGray = RGB16BIT(40,40,40);
-    uint16_t deepGray2 = RGB16BIT(68,68,68);
-
     for (int i = 0; i < maxNumofWLED; i++)
     {
         if (WLEDLights[i].getHasData() == true)
         {
-            drawFullCell(i, deepGray, deepGray2);
+           drawFullCell(i, deepGray, gray);
         }
         else
         {
-            drawEmptyCell(i, deepGray, deepGray2);
-            //drawFullCell(i, deepGray, deepGray2);
+            drawEmptyCell(i, deepGray, gray);
         }
     }
 }
 
 
-void WLEDpage::drawFullCell(uint16_t position, uint16_t colour1, uint16_t colour2)
+void WLEDpage::drawFullCell(uint16_t position, uint16_t bgColour, uint16_t circleColour)
 {
-    drawRoundBox(M5.Lcd.width()/2,69*(position+1)-4,M5.Lcd.width()-6, 65, colour1);
-    M5.Lcd.setTextSize(1);
-    M5.Lcd.drawString(WLEDLights[position].getIP(),16,69*(position+1)+5,1);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.drawString(WLEDLights[position].getName(),13,69*(position+1)-32,1);
-
-    M5.Lcd.fillCircle(M5.Lcd.width() - 35 , 69*(position+1)-4, 24, BLACK);
+    drawRoundBox(M5.Lcd.width()/2,69*(position+1)-4,M5.Lcd.width()-6, 65, bgColour);
+    M5.Lcd.setTextSize(1); M5.Lcd.drawString(WLEDLights[position].getIP(),16,69*(position+1)+5,1);
+    M5.Lcd.setTextSize(2); M5.Lcd.drawString(WLEDLights[position].getName(),13,69*(position+1)-32,1);
+    M5.Lcd.fillCircle(M5.Lcd.width() - 35 , 69*(position+1)-4, 24, circleColour);
 }
-
 
 void WLEDpage::drawEmptyCell(uint16_t position, uint16_t colour1, uint16_t colour2)
  {
@@ -164,40 +156,39 @@ void WLEDpage::drawPlusButton(uint16_t x, uint16_t y,uint16_t size, uint16_t cir
     M5.Lcd.drawPixel(x,y,RED);
     M5.Lcd.fillCircle(x, y, size, circleColour);   //Draw a red circle with a radius of 50 at (x,y)
 
-    M5.Lcd.drawFastHLine(x-(size/2)-gap, y+2, size+gap*2, lineColour);
-    M5.Lcd.drawFastHLine(x-1-(size/2)-gap, y+1, 2+size+gap*2, lineColour);
-    M5.Lcd.drawFastHLine(x-1-(size/2)-gap, y, 2+size+gap*2, lineColour);
-    M5.Lcd.drawFastHLine(x-1-(size/2)-gap, y-1, 2+size+gap*2, lineColour);
-    M5.Lcd.drawFastHLine(x-(size/2)-gap, y-2, size+gap*2, lineColour);
-
-    M5.Lcd.drawFastVLine(x+2, y-(size/2)-gap, size+gap*2, lineColour);
-    M5.Lcd.drawFastVLine(x+1, y-1-(size/2)-gap, 2+size+gap*2, lineColour);
-    M5.Lcd.drawFastVLine(x, y-1-(size/2)-gap, 2+size+gap*2, lineColour);
-    M5.Lcd.drawFastVLine(x-1, y-1-(size/2)-gap, 2+size+gap*2, lineColour);
-    M5.Lcd.drawFastVLine(x-2, y-(size/2)-gap, size+gap*2, lineColour);
+    M5.Lcd.drawFastHLine(x-(size/2)-gap, y+2, size+gap*2, lineColour);     M5.Lcd.drawFastHLine(x-1-(size/2)-gap, y+1, 2+size+gap*2, lineColour);
+    M5.Lcd.drawFastHLine(x-1-(size/2)-gap, y, 2+size+gap*2, lineColour);   M5.Lcd.drawFastHLine(x-1-(size/2)-gap, y-1, 2+size+gap*2, lineColour);
+    M5.Lcd.drawFastHLine(x-(size/2)-gap, y-2, size+gap*2, lineColour);     M5.Lcd.drawFastVLine(x+2, y-(size/2)-gap, size+gap*2, lineColour);
+    M5.Lcd.drawFastVLine(x+1, y-1-(size/2)-gap, 2+size+gap*2, lineColour); M5.Lcd.drawFastVLine(x, y-1-(size/2)-gap, 2+size+gap*2, lineColour);
+    M5.Lcd.drawFastVLine(x-1, y-1-(size/2)-gap, 2+size+gap*2, lineColour); M5.Lcd.drawFastVLine(x-2, y-(size/2)-gap, size+gap*2, lineColour);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+void WLEDPageButtonEvent(Event& e) {
+    Button& button = *e.button;
+    if ((e.button != &M5.BtnA) && (e.button != &M5.BtnB) && (e.button != &M5.BtnC)) {
+        Serial.println("pressed");
+        int i = std::stoi(button.label());
+        WLED b = WLEDtabPage.WLEDLights[i];
+        if (b.getHasData() == true) {
 
-void WLEDPageButtonEvent(Event& e)
-{
-    Button& b = *e.button;
-    int i = 1;
-    Serial.println(b.label());
-    uint16_t deepGray = RGB16BIT(140,140,140);
-    uint16_t deepGray2 = RGB16BIT(168,168,168);
-
-    if (WLEDtabPage.WLEDLights[i].getHasData() == true)
-    {
-        WLEDtabPage.drawFullCell(i, deepGray, deepGray2);
-    }
-    else
-    {
-        WLEDtabPage.drawEmptyCell(i, deepGray, deepGray2);
-        //drawFullCell(i, deepGray, deepGray2);
+            if (b.on == true) {
+                
+                WLEDtabPage.drawFullCell(i, gray, BLACK);
+            } else {
+                WLEDtabPage.drawFullCell(i, gray, b.getColour());
+            }
+            b.on = !b.on;
+            
+        }
+        else
+        {
+            WLEDtabPage.drawEmptyCell(i, gray, gray);
+            //drawFullCell(i, deepGray, deepGray2);
+        }
     }
 }
 

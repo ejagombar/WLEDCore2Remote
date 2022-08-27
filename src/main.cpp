@@ -22,6 +22,9 @@ void setup() {
   M5.begin(); 
   checkForWifiData();
   checkForSavedWLED();
+  M5.BtnA.addHandler(getTabSelection, E_TOUCH);
+  M5.BtnB.addHandler(getTabSelection, E_TOUCH);
+  M5.BtnC.addHandler(getTabSelection, E_TOUCH);
   WLEDtabPage.importWLEDData(WLEDLights);
   WLEDtabPage.openScreen();
 }
@@ -61,10 +64,7 @@ void checkForWifiData() //-----------------------------------checkForWifiData---
       }
     }
     
-  }
-
-  M5.Buttons.addHandler(getTabSelection, E_TOUCH);
-  
+  }  
 }
 
 void setupProcess() //-------------------------------------setupProcess---------------------------------------
