@@ -6,51 +6,6 @@ uint16_t deepGray = RGB16BIT(40,40,40);
 uint16_t gray = RGB16BIT(68,68,68);
 
 
-WLED::WLED()
-{
-
-}
-
-WLED::~WLED()
-{
-
-}
-
-void WLED::loadData(uint16_t getNum, String getIP, String getName, uint16_t getColour)
-{
-    name = getName;
-    IP = getIP;
-    hasData = true;
-    num = getNum;
-    colour = getColour;
-}
-
-
-String WLED::getIP()
-{
-    return IP;
-}
-
-String WLED::getName()
-{
-    return name;
-}
-
-bool WLED::getHasData()
-{
-    return hasData;
-}
-
-uint16_t WLED::getColour()
-{
-    return colour;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 WLEDpage::WLEDpage()
 {
     gotIP = false;
@@ -65,6 +20,12 @@ WLEDpage::~WLEDpage()
 }
 
 
+void WLEDpage::openScreen()
+{
+    initButtons();
+    drawScreen();
+    
+}
 
 void WLEDpage::importWLEDData(WLED getWLEDLights[])
 {
@@ -72,14 +33,6 @@ void WLEDpage::importWLEDData(WLED getWLEDLights[])
     {
         WLEDLights[i] = getWLEDLights[i];
     }
-}
-
-
-void WLEDpage::openScreen()
-{
-    initButtons();
-    drawScreen();
-    
 }
 
 void WLEDpage::closeScreen()
@@ -99,10 +52,9 @@ void WLEDpage::initButtons()
 
 void WLEDpage::deinitButtons()
 {
-    M5.Buttons.delHandlers(WLEDPageButtonEvent, nullptr, nullptr);
-
-    for(int i = 0; i < maxNumofWLED; i++)
+    for (int i = 0; i < maxNumofWLED; i++)
     {
+        buttonList[i]->delHandlers(WLEDPageButtonEvent);
         delete(buttonList[i]);
         buttonList[i] = NULL;
     }
@@ -119,9 +71,9 @@ void WLEDpage::drawScreen()
 
     for (int i = 0; i < maxNumofWLED; i++)
     {
-        if (WLEDLights[i].getHasData() == true)
+        if (WLEDLights[i].hasData() == true)
         {
-           drawFullCell(i, deepGray, gray);
+           drawFullCell(i, deepGray, BLACK);
         }
         else
         {
@@ -134,8 +86,8 @@ void WLEDpage::drawScreen()
 void WLEDpage::drawFullCell(uint16_t position, uint16_t bgColour, uint16_t circleColour)
 {
     drawRoundBox(M5.Lcd.width()/2,69*(position+1)-4,M5.Lcd.width()-6, 65, bgColour);
-    M5.Lcd.setTextSize(1); M5.Lcd.drawString(WLEDLights[position].getIP(),16,69*(position+1)+5,1);
-    M5.Lcd.setTextSize(2); M5.Lcd.drawString(WLEDLights[position].getName(),13,69*(position+1)-32,1);
+    M5.Lcd.setTextSize(1); M5.Lcd.drawString(WLEDLights[position].IP(),16,69*(position+1)+5,1);
+    M5.Lcd.setTextSize(2); M5.Lcd.drawString(WLEDLights[position].name(),13,69*(position+1)-32,1);
     M5.Lcd.fillCircle(M5.Lcd.width() - 35 , 69*(position+1)-4, 24, circleColour);
 }
 
@@ -170,24 +122,18 @@ void WLEDpage::drawPlusButton(uint16_t x, uint16_t y,uint16_t size, uint16_t cir
 void WLEDPageButtonEvent(Event& e) {
     Button& button = *e.button;
     if ((e.button != &M5.BtnA) && (e.button != &M5.BtnB) && (e.button != &M5.BtnC)) {
-        Serial.println("pressed");
         int i = std::stoi(button.label());
-        WLED b = WLEDtabPage.WLEDLights[i];
-        if (b.getHasData() == true) {
-
-            if (b.on == true) {
-                
-                WLEDtabPage.drawFullCell(i, gray, BLACK);
+        WLED &b = WLEDtabPage.WLEDLights[i];
+        if (b.hasData() == true) {
+        
+            if (b.on() == true) {
+                WLEDtabPage.drawFullCell(i, deepGray, BLACK); 
             } else {
-                WLEDtabPage.drawFullCell(i, gray, b.getColour());
+                WLEDtabPage.drawFullCell(i, deepGray, b.colour());
             }
-            b.on = !b.on;
-            
-        }
-        else
-        {
-            WLEDtabPage.drawEmptyCell(i, gray, gray);
-            //drawFullCell(i, deepGray, deepGray2);
+            b.on() = !b.on();
+        } else {
+            WLEDtabPage.drawEmptyCell(i, deepGray, gray);
         }
     }
 }

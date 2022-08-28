@@ -2,6 +2,7 @@
 #include <GDTouchKeyboard.h>
 #include "WIFIsetup.h"
 #include "WLEDpage.h"
+#include "WLED.h"
 
 #define maxNumofWLED 3
 
@@ -93,6 +94,7 @@ void checkForSavedWLED() //-------------------------------------checkForSavedWLE
     preferences.putString("name", "Bed");
     preferences.putUShort("colour", RED);
     preferences.end();
+
   for (int i = 0; i < maxNumofWLED; i++)
   {
     String wledSavedName = "wled";
@@ -108,7 +110,7 @@ void checkForSavedWLED() //-------------------------------------checkForSavedWLE
     if (!(ip == "" || name == ""))
     {
       WLEDLights[i].loadData(i, ip, name,colour);
-      Serial.print(WLEDLights[i].getName());
+      Serial.print(WLEDLights[i].name());
     }
 
     preferences.end();
@@ -124,6 +126,7 @@ void loop() //-------------------------------------loop-------------------------
 
 void getTabSelection(Event& e)
 {
+  Serial.println("A B or C pressed");
   WLEDtabPage.closeScreen();
   if (e.button == &M5.BtnA)
   {

@@ -6,42 +6,12 @@
 #include <M5Core2.h>
 #include <Free_Fonts.h>
 #include <Preferences.h>
+#include "WLED.h"
 
 void WLEDPageButtonEvent(Event& e);
 
 
 class WLEDpage;
-class WLED;
-
-
-class WLED
-{
-    public:
-
-        WLED();
-        ~WLED();
-
-        void loadData(uint16_t num, String IP, String name, uint16_t getColour);
-        String getIP();
-        String getName();
-        uint16_t getColour();
-        bool getHasData();
-        
-
-        bool on = false;
-
-    private:
-
-       
-        String IP = "";
-        String name = "";
-        uint16_t colour = 0;
-        
-        bool hasData = false;
-        uint16_t num;
-
-
-};
 
 
 class WLEDpage
