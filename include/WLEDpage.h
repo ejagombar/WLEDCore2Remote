@@ -6,6 +6,7 @@
 #include <M5Core2.h>
 #include <Free_Fonts.h>
 #include <Preferences.h>
+#include "WIFIsetup.h"
 #include "WLED.h"
 
 void WLEDPageButtonEvent(Event& e);
@@ -38,6 +39,7 @@ class WLEDpage
         void drawFullCell(uint16_t position, uint16_t colour1, uint16_t colour2);
         void initButtons();
         void deinitButtons();
+        void drawButtons(int i, WLED &b);
 
         bool gotIP = false;
         String WLEDIP;

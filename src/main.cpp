@@ -1,23 +1,4 @@
-#include <M5Core2.h>
-#include <GDTouchKeyboard.h>
-#include "WIFIsetup.h"
-#include "WLEDpage.h"
-#include "WLED.h"
-
-#define maxNumofWLED 3
-
-String SSID = "";
-String password = "";
-uint16_t colour = 0;
-uint8_t screenVal = 1;  //0 = WLED page    1 = colour page      2 = settings
-WLED WLEDLights[maxNumofWLED];
-
-
-void checkForWifiData();
-void setupProcess();
-void checkForSavedWLED();
-
-void getTabSelection(Event& e);
+#include "main.h"
 
 void setup() {
   M5.begin(); 
@@ -134,7 +115,7 @@ void getTabSelection(Event& e)
   }
   else if (e.button == &M5.BtnB)
   {
-    //colourPage.run();
+    cpPage.generateColourPicker();
   }
   else if (e.button == &M5.BtnC)
   {

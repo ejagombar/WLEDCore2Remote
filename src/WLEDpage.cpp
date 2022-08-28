@@ -1,5 +1,5 @@
 #include "WLEDpage.h"
-#include "WIFIsetup.h"
+
 
 
 uint16_t deepGray = RGB16BIT(40,40,40);
@@ -71,14 +71,8 @@ void WLEDpage::drawScreen()
 
     for (int i = 0; i < maxNumofWLED; i++)
     {
-        if (WLEDLights[i].hasData() == true)
-        {
-           drawFullCell(i, deepGray, BLACK);
-        }
-        else
-        {
-            drawEmptyCell(i, deepGray, gray);
-        }
+        WLED &b = WLEDLights[i];
+        drawButtons(i, b);
     }
 }
 
@@ -115,26 +109,32 @@ void WLEDpage::drawPlusButton(uint16_t x, uint16_t y,uint16_t size, uint16_t cir
     M5.Lcd.drawFastVLine(x-1, y-1-(size/2)-gap, 2+size+gap*2, lineColour); M5.Lcd.drawFastVLine(x-2, y-(size/2)-gap, size+gap*2, lineColour);
 }
 
+void WLEDpage::drawButtons(int i, WLED &b) {
+
+    if (b.hasData() == true) {
+
+        if (b.on() == true) {
+            drawFullCell(i, deepGray, b.colour()); 
+        } else {
+            drawFullCell(i, deepGray, BLACK);
+        }
+            
+    } else {
+        drawEmptyCell(i, deepGray, gray);
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void WLEDPageButtonEvent(Event& e) {
+void WLEDPageButtonEvent(Event& e){
     Button& button = *e.button;
     if ((e.button != &M5.BtnA) && (e.button != &M5.BtnB) && (e.button != &M5.BtnC)) {
         int i = std::stoi(button.label());
         WLED &b = WLEDtabPage.WLEDLights[i];
-        if (b.hasData() == true) {
-        
-            if (b.on() == true) {
-                WLEDtabPage.drawFullCell(i, deepGray, BLACK); 
-            } else {
-                WLEDtabPage.drawFullCell(i, deepGray, b.colour());
-            }
-            b.on() = !b.on();
-        } else {
-            WLEDtabPage.drawEmptyCell(i, deepGray, gray);
-        }
+        b.on() = !b.on();
+        WLEDtabPage.drawButtons(i,b);
     }
 }
 

@@ -10,13 +10,6 @@ struct RGB16BitColours
 };
 
 
-uint16_t RGB16BIT(uint8_t r, uint8_t g, uint8_t b) {
-  return ((uint16_t)((r>>3)<<11)|((g>>2)<<5)|(b>>3));
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 WifiSetup::WifiSetup()
 {
 
@@ -65,7 +58,6 @@ RGB16BitColours WifiSetup::WifiStrengthTo16BitColour(int strength)
   uint8_t B =  (b1-b2) * mappedStrength + b2;
 
   RGB16BitColours colours;
-
   colours.defaultColour = RGB16BIT(R,G,B);
   colours.lighterColour = RGB16BIT(R+25,G+25,B);
   colours.darkerColour = RGB16BIT(R-20,G-20,B);

@@ -18,4 +18,3 @@ void WLED::loadData(uint16_t num, String IP, String name, uint16_t colour)
     num_ = num;
     colour_ = colour;
 }
-
