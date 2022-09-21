@@ -4,6 +4,7 @@ void setup() {
   M5.begin(); 
   checkForWifiData();
   checkForSavedWLED();
+  cpPage.generateColourPicker();
   M5.BtnA.addHandler(getTabSelection, E_TOUCH);
   M5.BtnB.addHandler(getTabSelection, E_TOUCH);
   M5.BtnC.addHandler(getTabSelection, E_TOUCH);
@@ -101,24 +102,42 @@ void checkForSavedWLED() //-------------------------------------checkForSavedWLE
 void loop() //-------------------------------------loop---------------------------------------
 {
   M5.update();
+  if (M5.Touch.ispressed()) {
+    screenPressed();
+  }
+}
+
+void screenPressed(){
+  if (screenState == colourPickerTab) {
+    TouchPoint_t coordinate = M5.Touch.getPressPoint();
+    if ((coordinate.x >= 0) && (coordinate.y >= 0)){
+      cpPage.selectColour(coordinate.x,coordinate.y);
+      colour = cpPage.selectedColour();
+      Serial.printf("coord: %d %d",coordinate.x,coordinate.y);
+      cpPage.drawSelectedColour();
+    }
+  }
+
 }
 
 
 
 void getTabSelection(Event& e)
 {
-  Serial.println("A B or C pressed");
   WLEDtabPage.closeScreen();
   if (e.button == &M5.BtnA)
   {
+    screenState = wledTab;
     WLEDtabPage.openScreen();
   }
   else if (e.button == &M5.BtnB)
   {
-    cpPage.generateColourPicker();
+    screenState = colourPickerTab;
+    cpPage.drawColourPicker();
   }
   else if (e.button == &M5.BtnC)
   {
+     screenState = settingsTab;
     //settingsPage.run();
   }
 
